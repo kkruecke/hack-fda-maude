@@ -1,0 +1,9 @@
+1. Read, regex parse the foidev.txt file with new propective lasik records. We extract the mdr_report_key and device_product_code.
+
+    * Get the current foidevice table's max(mdr_report_key)
+    * Check that device code is "HNO" or "LZS" and mdr_report_key > max(device.mdr_report_key).
+    * Insert mdr_report_key and device code into foi_device in table maude_2014 (and maude_backup?).  
+    
+    Note: We allow duplicate mdr_report_keys, but the pair (mdr_report_key, device_product_code) must be unique.
+
+2. Read, regex parse mdrfoi.txt, extracting mdr_report_key, report_source_code and date_received.

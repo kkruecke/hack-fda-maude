@@ -1,0 +1,10 @@
+Comment
+-------
+
+medwatch-update-new is the newest prospective version of medwatch-update. It uses only one query and no intermediate tables.
+
+To Do
+-----
+
+Change MdrFileInserter.php to use the "TODO: ..." code that is currently commented out. Check if TextFileInserter.php can use the same "TODO ..."
+optimizations as MdrFileInserter.php -- with the "TODO: ..." code implemented and tested -- does.

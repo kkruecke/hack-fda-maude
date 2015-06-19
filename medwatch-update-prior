@@ -1,0 +1,97 @@
+#!/usr/bin/php
+<?php
+use Maude\Registry as Registry;
+        
+require_once("utility.php");
+
+boot_strap();
+
+try {
+   $insert_count = 0;
+
+   // Insert records from maude into medwatch_report_2014
+
+   $insert_medwatch_report_stmt = $pdo->prepare("INSERT INTO medwatch_report(mdr_report_key, text_report, date_received, report_source_code) values
+                                (:mdr_report_key, :text_report, :date_received, :report_source_code )");
+
+   // TODO: Make this a subquery to be left outer joined with the other query below. So there is just one query to insert the new records.
+   // Currently we are storing them in a temporary table medwatch_report_2014.
+
+   // Maude inner join to get new medwatch_report records
+   $select_query = "SELECT lhs.mdr_report_key, lhs.text_report, rhs.date_received, rhs.report_source_code FROM foitext as lhs
+                    INNER JOIN mdrfoi as rhs on lhs.mdr_report_key=rhs.mdr_report_key";
+
+   foreach ($pdo->query($select_query) as $row) {
+
+       $mdr_report_key = $row['mdr_report_key'];
+
+       $text_report =  $row['text_report'];
+
+       $date_received =  $row['date_received'];
+
+       $report_source_code =  $row['report_source_code'];
+
+       $insert_medwatch_report_stmt->execute();
+       ++$insert_count;
+   }
+ 
+   // bind the parameters in each statement
+   $insert_medwatch_report_stmt->bindParam(':mdr_report_key', $mdr_report_key, \PDO::PARAM_INT);
+        
+   $insert_medwatch_report_stmt->bindParam(':text_report', $text_report, \PDO::PARAM_STR);
+
+   $insert_medwatch_report_stmt->bindParam(':date_received', $date_received, \PDO::PARAM_STR);
+
+   $insert_medwatch_report_stmt->bindParam(':report_source_code', $report_source_code, \PDO::PARAM_STR);
+
+   
+   // Find new mdr_report_keys that are in table medwatch_report_20XX but are not in medwatch_report. To get these, do left outer join looking for "IF NULL".
+   
+   $select_query = "SELECT *  FROM   medwatch_report_2014 as m2014 
+                              LEFT OUTER JOIN
+                           medwatch_report as m
+                               ON m2014.mdr_report_key=m.mdr_report_key
+                           WHERE m.mdr_report_key IS NULL ORDER BY m2014.mdr_report_key"; 
+
+   // SQL statement with named placeholders 
+   $insert_medwatch_report_stmt = $pdo->prepare("INSERT INTO medwatch_report(mdr_report_key, text_report, date_received, report_source_code) values
+                                (:mdr_report_key, :text_report, :date_received, :report_source_code )");
+
+   // bind the parameters in each statement
+   $insert_medwatch_report_stmt->bindParam(':mdr_report_key', $mdr_report_key, \PDO::PARAM_INT);
+        
+   $insert_medwatch_report_stmt->bindParam(':text_report', $text_report, \PDO::PARAM_STR);
+
+   $insert_medwatch_report_stmt->bindParam(':date_received', $date_received, \PDO::PARAM_STR);
+
+   $insert_medwatch_report_stmt->bindParam(':report_source_code', $report_source_code, \PDO::PARAM_STR);
+   
+   $insert_count = 0;
+
+   foreach ($pdo->query($select_query) as $row) {
+
+       $mdr_report_key = $row['mdr_report_key'];
+
+       $text_report =  $row['text_report'];
+
+       $date_received =  $row['date_received'];
+
+       $report_source_code =  $row['report_source_code'];
+
+       $insert_medwatch_report_stmt->execute();
+       ++$insert_count;
+   }
+    
+   
+} catch (Exception $e) {
+
+   $errors = "\nException Thrown in " . $e->getFile() . " at line " . $e->getLine() . "\n";
+      
+   $errors .= "Stack Trace as string:\n" . $e->getTraceAsString() . "\n";
+          
+   $errors .= "Error message is: " .   $e->getMessage() . "\n";
+      
+   echo $errors;
+
+} // end try
+
