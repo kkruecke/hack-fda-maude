@@ -140,6 +140,7 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
      $date_received  = create_date($matches[1][7]);   // date is in format of MM/DD/YYYY      
 
      // Make sure the mdrfoi.mdr_report_key was not already inserted.
+     // TODO: Does this check still need to be done?
      
      $exist_already_stmt = $this->getPDO()->query("SELECT mdr_report_key FROM mdrfoi WHERE mdr_report_key={$this->mdr_report_key}");
 
