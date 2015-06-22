@@ -1,5 +1,6 @@
-<?hh
+<?hh // partial
 namespace Maude;
+use Maude\SplFileObjectExt;
 /*
  * Purpose: Insert records into foi_device table whose schema is:
  * 
@@ -39,19 +40,18 @@ function create_date($input)
 
 class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInterface { 
 
-   private \SplFileObject $LogFile;
-   private \ImmSet<int> $foidev_mdr_report_keys;
-   //--private $max_of_foidev_mdr_report_keys = array();
+   private SplFileObjectExt $LogFile;
+   private \ImmSet<int>   $foidev_mdr_report_keys;
    private \PDOStatement  $insert_stmt;
    private string $regex;
    private int $insert_count;
+   private int $mdr_report_key;
 
   public function __construct($file_name, \PDO $pdo_handle)
   {
        parent::__construct($file_name, $pdo_handle);
                  
-       $LogFile = new \SplFileObject("device-log.txt", "w");
-       $LogFile->setFlags(\SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY);
+       $LogFile = new SplFileObjectExt("device-log.txt", "w");
        
         // Set to a default values for now, so bindParam can be called.
        $this->mdr_report_key = (int) 0;        
@@ -64,7 +64,7 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
        $this->insert_count = 0;
  }
  
-  public function setUp()
+  public function setUp() : void
   {           
       // SQL statements with named placeholders 
       $select_sql = "SELECT DISTINCT mdr_report_key FROM foi_device ORDER BY mdr_report_key ASC";
@@ -97,7 +97,7 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
       $this->insert_stmt->bindParam(':date_received', $this->date_received, \PDO::PARAM_STR);
   } 
   
-  public function processLine($text, $line_number)
+  public function processLine($text, $line_number) : void
   {
       $matches = array();
       
@@ -161,8 +161,8 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
       
   } // end method
   
-  // Change format from   MM/DD/YYYY to MySQL format of YYYY-MM-DD    
-  protected function create_date($input)
+  // Change format from MM/DD/YYYY to MySQL format of YYYY-MM-DD    
+  protected function create_date($input) : string
   {
      $date_parts = explode("/", $input); // date is in format of MM/DD/YYYY      
   
@@ -177,4 +177,3 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
   }
 
 } // end class
-

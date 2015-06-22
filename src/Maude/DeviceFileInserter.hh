@@ -1,5 +1,6 @@
-<?hh
+<?hh // partial
 namespace Maude;
+use Maude\SplFileObjectExt;
 /*
   IMPORTANT: According to FDA Maude database instructions for the FOIDEV.zip files:
 
@@ -11,32 +12,26 @@ namespace Maude;
 
 class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateInterface {
 
-   private  $device_product_code;
-   private  $device_key;
-   //--private  $prior_mdr_report_keys = array();     
-   private  $max_mdr_report_keys;
-   private  $mdr_report_key;          // value in current line
-   private  $regex;
-   private  $hit_count;
-   private  $insert_count;
-   private  $insert_stmt;
-   private  $LogFile;
-   private  $first_insert;
+   private  string $device_product_code;
+   private  int $device_key;
+   private  int $max_mdr_report_key;
+   private  int $mdr_report_key;          // value in current line
+   private  string $regex;
+   private  int $hit_count;
+   private  int $insert_count;
+   private  \PDOStatement $insert_stmt;
+   private  SplFileObjectExt $LogFile;
+   private  bool $first_insert;
 
    public function __construct($file_name, \PDO $pdo_handle)
    {
-      
       parent::__construct($file_name, $pdo_handle);
 
       $this->first_insert = false;
 
       // Create error log
-      $this->LogFile = new \SplFileObject("error-log.txt", "w");
+      $this->LogFile = new SplFileObjectExt("error-log.txt", "w");
       
-      $this->LogFile->setFlags(\SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY);
-
-      $this->max_mdr_report_key = (int) 0;        
-                                    
       $this->device_product_code = (string) "";
                                     
       $this->device_key = (int) 0;
@@ -51,7 +46,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       $this->max_mdr_report_key = -1; 
 
       // SQL statement with named placeholders 
-      $this->insert_stmt = $this->getPDO()->prepare("INSERT INTO foi_device(mdr_report_key, device_product_code) values
+      $this->insert_stmt = $this->pdo_handle->prepare("INSERT INTO foi_device(mdr_report_key, device_product_code) values
 	      (:mdr_report_key, :device_product_code )");
 
       // bind the parameters in each statement
@@ -60,7 +55,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       $this->insert_stmt->bindParam(':device_product_code', $this->device_product_code, \PDO::PARAM_STR);
    }
   
-    protected function setUp()
+    protected function setUp() : void
     { 
      /*
         $select_stmt = $this->getPDO()->query("SELECT mdr_report_key FROM foi_device ORDER BY mdr_report_key ASC");
@@ -75,7 +70,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
         $this->max_mdr_report_keys = $row['max_mdr_report_key']; 
     }
 
-    protected function processLine($text, $line_number)
+    protected function processLine($text, $line_number) : void
     {
        $matches = array();
 
@@ -104,8 +99,9 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
          } else if (count($matches[1]) < 44) {
       
             echo "matches[1] count is " . count($matches[1]) . " on line $line_number \n";
-      
-            $this->LogFile->fwrite("$line_number : match count not equal to 44. match count equals " . count($matches[1]) . "\n");
+            $text = "$line_number : match count not equal to 44. match count equals " . (string) count($matches[1]) . "\n";
+
+            $this->LogFile->fwrite($text, strlen($text));
             return;
          }
       
@@ -150,7 +146,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
         // Add it to the array of mdr_report_keys. Note: We assume the input file was in sorted order, and only more recent data is being inserted.
         // Therefore we do not resort the array.
         // TODO: Make this an associative array that maps mdr_report_key to Device Code?
-        $this->prior_mdr_report_keys[] = $this->mdr_report_key;
+        //--$this->prior_mdr_report_keys[] = $this->mdr_report_key;
         
         if (++$this->insert_count % 1000 == 0) {
   
@@ -165,15 +161,14 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
          
               $errors .= "PDO Error: " . $e->getMessage() . "\n";  
           
-              $errors .= "mdr_report_key is $mdr_report_key\n";
+              $errors .= "mdr_report_key is {$this->mdr_report_key}\n";
                   
               echo $errors;
              
-              $this->LogFile->fwrite($errors);
+              $this->LogFile->fwrite($errors, strlen($errors));
     
               throw $e;
         }          
     } // end method
 
 }  // end class
-?>

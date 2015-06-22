@@ -1,42 +1,42 @@
 <?hh
 namespace Maude;
+use Maude\SplFileObjectExt;
 
 abstract class AbstractFileInserter  {
 
-    protected \Object $pdo_handle;
-    protected \SplFileObject$spl_file;
+    protected \PDO $pdo_handle;
+    protected SplFileObjectExt $spl_file;
     protected string $filename;
+  
+    public function __construct($file_name, \PDO $handle)
+    {
+      
+       $this->pdo_handle = $handle;
+       $this->filename = $file_name;
 
-    protected function getFileName()
+       $this->spl_file = new SplFileObjectExt($file_name);
+    }
+
+    protected function getFileName() : string
     {
        return $this->filename;
     }
 
-    protected function getPDO()
+    protected function getPDO() : \PDO
     {
        return $this->pdo_handle;
     }
     
-    protected function getspl_file()
+    protected function getsplext_file() : SplFileObjectExt
     {
         return $this->spl_file;
     } 
-  
-    public function __construct($file_name, \PDO $handle)
-    {
-       $this->pdo_handle = $handle;
-       $this->filename = $file_name;
 
-       $this->spl_file = new \SplFileObject($file_name);
-
-       $this->spl_file->setFlags(\SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY);
-    }
-
-    abstract protected function setUp();
+    abstract protected function setUp() : void;
     
-    abstract protected function processLine($text, $line_number);
+    abstract protected function processLine($text, $line_number) : void;
     
-    public function updateDatabase()
+    public function updateDatabase() : void
     {
        try {
 
@@ -63,6 +63,14 @@ abstract class AbstractFileInserter  {
          
           throw $e;
           
+      } catch (\Exception $e) {
+
+          $errors = "Error: " . $e->getMessage() . "\n";  
+      
+          echo $errors;
+         
+          throw $e;
       }
+      
     }     
 }

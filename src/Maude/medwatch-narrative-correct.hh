@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 include "hidden/MaudeDbConfig.php";
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /*
  * Purpose: Takes text and puts it in standard English sentence form. 
  */

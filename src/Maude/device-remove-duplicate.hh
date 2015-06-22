@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /*
  Save only unique mdr_report_keys. Get rid of the device code. 
   */

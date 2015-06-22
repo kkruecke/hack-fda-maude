@@ -1,5 +1,6 @@
-<?hh
+<?hh // partial
 namespace Maude;
+use Maude\SplFileObjectExt;
 /*
  * Purpose: To save patient text report for lasik reports
  * Note: The mdr_report_key, the first field in foitextXXXX.txt, is not necessarily unique.  Not sure why.
@@ -7,28 +8,26 @@ namespace Maude;
 
 class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInterface {
    
-   private $FileIter;
-   private $file_name;
-   private $LogFile;
-   private $mdr_report_key;
-   private $text_report;
-   private $insert_stmt;
-   private $mdr_report_keys = array();
-   private $max_mdr_report_key_in_foitext; 
+   private string $file_name;
+   private SplFileObjectExt $LogFile;
+   private int $mdr_report_key;
+   private string $text_report;
+   private \PDOStatement $insert_stmt;
+   //--private $mdr_report_keys = array();
+   private int $max_mdr_report_key_in_foitext; 
 
-   private $prior_mdr_report_key;
+   private int $prior_mdr_report_key;
 
-   private $insert_count = 0;
-   private $txt_line_count = 0;
-   private $hit_count = 0;
-   private $regxex;
+   private int $insert_count = 0;
+   private int $txt_line_count = 0;
+   private int $hit_count = 0;
+   private string $regxex;
        
    public function __construct($file_name, \PDO $db_handle)
    {
        parent::__construct($file_name, $db_handle);
            
-       $this->LogFile = new \SplFileObject("text-log.txt", "w");
-       $this->LogFile->setFlags(\SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY);
+       $this->LogFile = new SplFileObjectExt("text-log.txt", "w");
          
        $this->text_report = (string) "";
        $this->mdr_report_key = (int) 0;
@@ -49,7 +48,7 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
        $this->txt_line_count = 0;
    }
 
-   protected function setUp()
+   protected function setUp() : void
    {
     // TODO: Add the same code that currently is commented out with "TODO..." in MdrFileInserter.php.
  
@@ -80,9 +79,8 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
        $max_select_stmt = $this->getPDO()->query("SELECT MAX(mdr_report_key) from foitext"); 
        $this->max_mdr_report_key_in_foitext = (int) $max_select_stmt->fetch(\PDO::FETCH_COLUMN, 0); 
    }
-
  
-   public function processLine($text, $line_number)
+   public function processLine($text, $line_number) : void
    {
           /*
            * FOI TEXT files contains the following 6 fields, delimited by pipe (|), one record per line:
@@ -199,7 +197,7 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
       
    }
 
-   protected function fixText($text)
+   protected function fixText($text) : string
    {
       $str = strtolower($text);
       
@@ -229,4 +227,3 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
        return $str; 
     }
 }
-?>

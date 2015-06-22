@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 include "hidden/MaudeDbConfig.php";
 /*
  * Purpose: Insert records into foi_device table whose schema is:

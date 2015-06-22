@@ -1,5 +1,6 @@
-<?hh
+<?hh // partial
 include "hidden/MaudeDbConfig.php";
+use Maude\SplFileObjectExt;
 /*
  * Delete the rows of mdrfoi where the mdr_report_key is not in foi_device and delete them: 
 
@@ -12,10 +13,8 @@ include "hidden/MaudeDbConfig.php";
   
 try {
     
-    $LogFile = new \SplFileObject("mdrfoi-delete-log.txt", "w");
-    $LogFile->setFlags(SplFileObject::READ_AHEAD | SplFileObject::SKIP_EMPTY);
+    $LogFile = new SplFileObjectExt("mdrfoi-delete-log.txt", "w");
 
-       
     $dbh = new PDO("mysql:host=localhost;dbname=" . $MaudeDbConfig['dbname'], $MaudeDbConfig['dbuser'], $MaudeDbConfig['passwd']);  
 
     $dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );  
@@ -40,4 +39,3 @@ try {
     echo $errors;
     $LogFile->fwrite($errors);
 }
-?>

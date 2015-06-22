@@ -1,5 +1,7 @@
-<?hh
-include "hidden/MaudeDbConfig.php";
+<?hh // partial
+use Maude\SplFileObjectExt;
+
+include "hidden/MaudeDbConfig.hh";
 /*
   The MDR Report Key is not always unique in the foitext file.  The Text Key, the second column, is unique. Since it isn't really clear why there
   occasionally (and very infrequency) are extra, additional reports, I decided to just take the first report, where the text key has the lowest value.
@@ -22,8 +24,7 @@ EOD;
 try {
 
         
-    $LogFile = new \SplFileObject("fotext-delete-log.txt", "w");
-    $LogFile->setFlags(SplFileObject::READ_AHEAD | SplFileObject::SKIP_EMPTY);
+    $LogFile = new SplFileObjectExt("fotext-delete-log.txt", "w");
   
     $dbh = new PDO("mysql:host=localhost;dbname=" . $MaudeDbConfig['dbname'], $MaudeDbConfig['dbuser'], $MaudeDbConfig['passwd']);  
    
@@ -50,4 +51,3 @@ try {
      $LogFile->fwrite($errors);
      return;
 }
-?>

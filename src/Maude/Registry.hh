@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 namespace Maude;
 
 /*
@@ -93,4 +93,3 @@ class Registry implements \ArrayAccess {
         return isset(self::$container[$offset]) ? self::$container[$offset] : null;
     }
 }
-?>
