@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh 
 namespace Maude;
 use Maude\SplFileObjectExt;
 /*
@@ -32,7 +32,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       parent::__construct($file_name, $pdo_maude_recent);
 
       $this->LogFile = new SplFileObjectExt( "device-file-inserter.log" ," w"); 
-      $this->new_lasik_mdr_report_keys = new Set<int>();
+      $this->new_lasik_mdr_report_keys = new Set {};
       /*
        * These are hardcoded values
        */
@@ -68,8 +68,8 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
         
       $this->insert_stmt->bindParam(':device_product_code', $this->device_product_code, \PDO::PARAM_STR);
    }
-  
-    protected function setUp() : void
+ 
+    final protected function setUp() : void
     { 
         // New code
         $select_stmt = $this->pdo_maude_2014->query("SELECT max(mdr_report_key) as max_mdr_report_key FROM foi_device");
