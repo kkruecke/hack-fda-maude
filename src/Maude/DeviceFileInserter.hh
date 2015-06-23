@@ -27,21 +27,18 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
    private \PDO $pdo_maude_2014;
    private \Set<int> $new_lasik_mdr_report_keys;
 
-   public function __construct($file_name, array $old_db, \PDO $pdo_maude_recent)
+   public function __construct($file_name, \PDO $pdo_maude_recent)
    {
       parent::__construct($file_name, $pdo_maude_recent);
 
-     $this->new_lasik_mdr_report_keys = new Set<int>();
+      $this->LogFile = new SplFileObjectExt( "device-file-inserter.log" ," w"); 
+      $this->new_lasik_mdr_report_keys = new Set<int>();
       /*
        * These are hardcoded values
        */
-      $dsn = 'mysql:dbname=' . $old_db['dbname'] . ';host=127.0.0.1';
+      $dsn = 'mysql:dbname=maude_2014;host=127.0.0.1';
 
-      $user = $old_db['dbuser'];
-
-      $password = $old_db['dbpass'];
-
-      $this->pdo_maude_2014 = new \PDO($dsn, $user, $password); 
+      $this->pdo_maude_2014 = new \PDO($dsn, 'kurt', 'kk0457'); 
       
       $this->first_insert = false;
       $this->mdr_report_key = -1;
@@ -49,9 +46,9 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       // Create error log
       $this->LogFile = new SplFileObjectExt("error-log.txt", "w");
       
-      $this->device_product_code = (string) "";
+      $this->device_product_code = "";
                                     
-      $this->device_key = (int) 0;
+      $this->device_key = 0;
       
       $this->hit_count = 0;
       
@@ -74,17 +71,18 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
   
     protected function setUp() : void
     { 
-     /*
+        // New code
+        $select_stmt = $this->pdo_maude_2014->query("SELECT max(mdr_report_key) as max_mdr_report_key FROM foi_device");
+        $row = $select_stmt->fetch();
+        $this->max_mdr_report_key = $row['max_mdr_report_key']; 
+
+        /* old code
         $select_stmt = $this->getPDO()->query("SELECT mdr_report_key FROM foi_device ORDER BY mdr_report_key ASC");
         $this->prior_mdr_report_keys = $select_stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
          
         $this->prior_mdr_report_keys = array_unique($this->prior_mdr_report_keys, SORT_NUMERIC); 
         return;
-      */   
-        // New code
-        $select_stmt = $this->pdo_maude_2014->query("SELECT max(mdr_report_key) as max_mdr_report_key FROM foi_device");
-        $row = $select_stmt->fetch();
-        $this->max_mdr_report_key = $row['max_mdr_report_key']; 
+         */ 
     }
 
     protected function processLine($text, $line_number) : void
