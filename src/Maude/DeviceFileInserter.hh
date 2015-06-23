@@ -23,15 +23,25 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
    private  SplFileObjectExt $LogFile;
    private  bool $first_insert;
 
-   private \PDO $pdo_maude_2014;
 
-   public function __construct($file_name, array $maude_2014_dsn, \PDO $pdo_maude_recent)
+   private \PDO $pdo_maude_2014;
+   private \Set<int> $new_lasik_mdr_report_keys;
+
+   public function __construct($file_name, array $old_db, \PDO $pdo_maude_recent)
    {
       parent::__construct($file_name, $pdo_maude_recent);
+
+     $this->new_lasik_mdr_report_keys = new Set<int>();
       /*
        * These are hardcoded values
        */
-      $this->pdo_maude_2014 = new \PDO( ); 
+      $dsn = 'mysql:dbname=' . $old_db['dbname'] . ';host=127.0.0.1';
+
+      $user = $old_db['dbuser'];
+
+      $password = $old_db['dbpass'];
+
+      $this->pdo_maude_2014 = new \PDO($dsn, $user, $password); 
       
       $this->first_insert = false;
       $this->mdr_report_key = -1;
@@ -47,7 +57,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       
       $this->insert_count = 0; 
 
-      $this->regex = "/([^|]*)\|/";
+      $this->regex = (string) "/([^|]*)\|/";
 
       // In case the table is empty and has not maxium mdr_report_key was use a default of -1
       $this->max_mdr_report_key = -1; 
