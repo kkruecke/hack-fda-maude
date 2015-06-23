@@ -23,11 +23,18 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
    private  SplFileObjectExt $LogFile;
    private  bool $first_insert;
 
-   public function __construct($file_name, \PDO $pdo_handle)
-   {
-      parent::__construct($file_name, $pdo_handle);
+   private \PDO $pdo_maude_2014;
 
+   public function __construct($file_name, array $maude_2014_dsn, \PDO $pdo_maude_recent)
+   {
+      parent::__construct($file_name, $pdo_maude_recent);
+      /*
+       * These are hardcoded values
+       */
+      $this->pdo_maude_2014 = new \PDO( ); 
+      
       $this->first_insert = false;
+      $this->mdr_report_key = -1;
 
       // Create error log
       $this->LogFile = new SplFileObjectExt("error-log.txt", "w");
@@ -46,7 +53,7 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       $this->max_mdr_report_key = -1; 
 
       // SQL statement with named placeholders 
-      $this->insert_stmt = $this->pdo_handle->prepare("INSERT INTO foi_device(mdr_report_key, device_product_code) values
+      $this->insert_stmt = $this->pdo_maude_recent->prepare("INSERT INTO foi_device(mdr_report_key, device_product_code) values
 	      (:mdr_report_key, :device_product_code )");
 
       // bind the parameters in each statement
@@ -65,9 +72,9 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
         return;
       */   
         // New code
-        $select_stmt = $this->getPDO()->query("SELECT max(mdr_report_key) as max_mdr_report_key FROM foi_device");
+        $select_stmt = $this->pdo_maude_2014->query("SELECT max(mdr_report_key) as max_mdr_report_key FROM foi_device");
         $row = $select_stmt->fetch();
-        $this->max_mdr_report_keys = $row['max_mdr_report_key']; 
+        $this->max_mdr_report_key = $row['max_mdr_report_key']; 
     }
 
     protected function processLine($text, $line_number) : void
@@ -86,14 +93,16 @@ class DeviceFileInserter extends AbstractFileInserter implements DatabaseUpdateI
       
         if ($hit_count === FALSE) { // This should never happen
               
-              throw new Exception("no hits, exiting... line number is $this->lineNumber");
+              throw new Exception("no hits, exiting... line number is $lineNumber");
         }
       
         if (!isset($matches[1]) ) {
       
             echo "matches[1] is not set on line $line_number \n";
-      
-            $this->LogFile->fwrite("$line_number : $matches[1] not set\n");
+
+            $text = "$line_number : $matches[1] not set\n";
+
+            $this->LogFile->fwrite($text, strlen($text));
             return;
           
          } else if (count($matches[1]) < 44) {

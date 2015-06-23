@@ -41,17 +41,24 @@ function create_date($input)
 class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInterface { 
 
    private SplFileObjectExt $LogFile;
-   private \ImmSet<int>   $foidev_mdr_report_keys;
+   private \Set<int>   $foidev_mdr_report_keys;
+   private int $max_of_foidev_mdr_report_keys;
    private \PDOStatement  $insert_stmt;
    private string $regex;
    private int $insert_count;
    private int $mdr_report_key;
+   private string $report_source_code;
+   private string $date_received;
 
   public function __construct($file_name, \PDO $pdo_handle)
   {
        parent::__construct($file_name, $pdo_handle);
                  
-       $LogFile = new SplFileObjectExt("device-log.txt", "w");
+       $this->LogFile = new SplFileObjectExt("device-log.txt", "w");
+
+       $this->foidev_mdr_report_keys = new \Set(); 
+
+       $this->max_of_foidev_mdr_report_keys = 0; 
        
         // Set to a default values for now, so bindParam can be called.
        $this->mdr_report_key = (int) 0;        
@@ -68,14 +75,14 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
   {           
       // SQL statements with named placeholders 
       $select_sql = "SELECT DISTINCT mdr_report_key FROM foi_device ORDER BY mdr_report_key ASC";
-        
-      if ($select_sql === FALSE) {
+
+      $select_stmt = $this->getPDO()->query($select_sql);  
+
+      if ($select_stmt === FALSE) {
             
            throw new \Exception("'SELECT DISTINCT mdr_report_key FROM foi_device ORDER BY mdr_report_key' returned false\n"
                    . "Run DeviceFileInserter.php first\n");
       }
-
-      $select_stmt = $this->getPDO()->query($select_sql);
     
       // bind the parameters in each stateme"SELECT DISTINCT mdr_report_key FROM foi_device ORDER BY mdr_report_key nt
       $this->foidev_mdr_report_keys = $select_stmt->fetchAll(\PDO::FETCH_COLUMN, 0);
@@ -114,7 +121,8 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
 
          echo "matches[1] count is " . count($matches[1]) . " on line $line_count \n";
 
-         $this->LogFile->fwrite("$line_count : match count less than 8 (8th column is data_received). Match count equals " . count($matches[1]) . "\n");
+         $text = "$line_count : match count less than 8 (8th column is data_received). Match count equals " . count($matches[1]) . "\n";
+         $this->LogFile->fwrite($text, strlen($text));
          return;
       }
 
@@ -156,7 +164,7 @@ class MdrFileInserter extends AbstractFileInserter implements DatabaseUpdateInte
      
      if (++$this->insert_count % 10000 == 0) {
 
-          echo "$insert_count number of records written so far out of $line_count lines read ...\n";
+          echo "{$this->insert_count} number of records written so far out of $line_count lines read ...\n";
      }
       
   } // end method

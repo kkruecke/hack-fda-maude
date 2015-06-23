@@ -22,6 +22,7 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
    private int $txt_line_count = 0;
    private int $hit_count = 0;
    private string $regxex;
+   private string $regex;
        
    public function __construct($file_name, \PDO $db_handle)
    {
@@ -97,7 +98,7 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
                   
           $matches = array();
             
-          $this->line_count = $line_number + 1; 
+          $this->txt_line_count = $line_number + 1; 
                
            //  $arr = explode("|", $text); failed because there was one line with | in the narrative text. So a regular expression is preferred
       
@@ -105,10 +106,10 @@ class TextFileInserter extends AbstractFileInserter implements DatabaseUpdateInt
           
           if (count($matches) != 7) {
       
-               $error_msg = "Hit count is $hit_count rather than 7 on line number $this->line_count of file $filename\n";
+               $error_msg = "Hit count is $hit_count rather than 7 on line number $this->txt_line_count of file " . $this->getFileName() . "\n";
                echo $error_msg;
       
-               $LogFile->fwrite($error_message);     
+               $this->LogFile->fwrite($error_msg, strlen($error_msg));     
       
                return;
           }
