@@ -1,10 +1,3 @@
-Comment
--------
+Introducing Hack: https://blog.engineyard.com/2014/hhvm-hack
 
-medwatch-update-new is the newest prospective version of medwatch-update. It uses only one query and no intermediate tables.
-
-To Do
------
-
-Change MdrFileInserter.php to use the "TODO: ..." code that is currently commented out. Check if TextFileInserter.php can use the same "TODO ..."
-optimizations as MdrFileInserter.php -- with the "TODO: ..." code implemented and tested -- does.
+Converting C++ code in fda-maude repository to Hack, replacing this Hack version.
