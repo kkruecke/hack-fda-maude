@@ -21,19 +21,20 @@ For example, below we concatenate to foixtextXXX.txt files, sort it by the first
     $ cat fitext1.txt >> foitext2.txt
     $ sort -t'|' -k1 foitext2.txt | uniq > foitext.txt
 
-Then we edit maude.ini with the name of the input data file. We then run the php script **update-maude** to update the maude database tables with the new lasik adverse
-event reports from patients.
+Then we edit maude.ini with the name of the input data file. We then 
 
-Lastly, the php script **medwatch-update** adds new records to the medwatch\_report table in the maude database--I believe. 
+1. run the php script **update-maude** to update the maude database tables with the new lasik adverse event reports from patients.
 
-Then finally a manual sql command inserts new these new medwatch\_report records into the medwatch database.
+2. Lastly, the php script **medwatch-update** adds new records to the medwatch\_report table in the maude database--I believe. 
+
+3. Then finally a manual sql command inserts new these new medwatch\_report records into the medwatch database.
 
 Note: I am not certain about the last two steps. medwatch-update-prior -- whose purpose I forget -- actually instantiates a PDO object, which medwatch-update does not
 yet do. 
 
-Currently mdr_report_key is unique in maude database tables mdrfoi, foidevice and foitext. I'm not sure it was initially. For future code, can we assume it is unique 
+Currently mdr\_report\_key is unique in maude database tables mdrfoi, foidevice and foitext. I'm not sure it was initially. For future code, can we assume it is unique 
 with in the .txt files? 
 
 
-note: maude_2014 appears to be most recent maude lasik data and maude_backup appears to be all of lasik data from 1998?
+note: maude\_2014 appears to be most recent maude lasik data and maude\_backup appears to be all of lasik data from 1998?
 # hack-fda-maude
